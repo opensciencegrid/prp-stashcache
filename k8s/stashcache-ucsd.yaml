@@ -14,7 +14,7 @@ spec:
     spec:
       hostNetwork: true
       nodeSelector:
-        kubernetes.io/hostname: xcache-11.t2.ucsd.edu
+        kubernetes.io/hostname: stashcache.t2.ucsd.edu
       initContainers:
       - name: chowndata
         image: busybox
@@ -32,22 +32,24 @@ spec:
           mountPath: /data5/stash
         - name: datavol6
           mountPath: /data6/stash
+        - name: datavol7
+          mountPath: /data7/stash
       containers:
       - name: stashcache
         resources:
            limits:
-              memory: 16Gi
+              memory: 24Gi
            requests:
-              memory: 13Gi
-        image: efajardo/prp-stashcache
+              memory: 18Gi
+        image: opensciencegrid/prp-stashcache
         #command: ["sh", "-c", "sleep infinity"]
         env:
         - name: LOCAL_CACHE_DIR
           value: /xrdpfc/stash
-        - name: RAMSIZE
-          value: 13g
-        - name: X509_USER_PROXY
-          value: /tmp/x509up_xrootd xrdcp
+        - name: REDIRECTOR
+          value: stashcache.t2.ucsd.edu:9004
+        - name: XRDHTTPPORT
+          value: "9001"
         - name: SITENAME
           value: UCSD-Kubernetes-PRP
         - name: DATA1
@@ -84,6 +86,8 @@ spec:
           mountPath: /data5/stash
         - name: datavol6
           mountPath: /data6/stash
+        - name: datavol7
+          mountPath: /data7/stash
       volumes:
       - name : hostcert
         hostPath:
@@ -119,4 +123,8 @@ spec:
       - name: datavol6
         hostPath:
           path: /data6
+          type: Directory
+      - name: datavol7
+        hostPath:
+          path: /data7
           type: Directory

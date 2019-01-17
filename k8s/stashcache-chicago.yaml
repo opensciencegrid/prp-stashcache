@@ -36,8 +36,6 @@ spec:
           value: /data/stash
         - name: SITENAME
           value: Chicago-Kubernetes-PRP
-        - name: RAMSIZE
-          value: 13g
         - name: REDIRECTOR
           value: osg.chic.nrp.internet2.edu:9004
         - name: XRDHTTPPORT
