@@ -47,8 +47,8 @@ spec:
         - name: hostkey
           mountPath: /etc/grid-security/hostkey.pem
         - name: config
-          mountPath: /etc/xrootd/config.d/95-k8s-ports.cfg
-          subPath: 95-k8s-ports.cfg
+          mountPath: /etc/xrootd/config.d/40-osg-http.cfg
+          subPath: 40-osg-http.cfg
         - name: supervisorconf
           mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
           subPath: 90-fix-certs-initialization.conf

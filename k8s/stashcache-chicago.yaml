@@ -28,8 +28,10 @@ spec:
         resources:
            limits:
               memory: 20Gi
+              cpu: 6
            requests:
               memory: 18Gi
+              cpu: 5
         #command: ["sh", "-c", "sleep infinity"]
         env:
         - name: LOCAL_CACHE_DIR

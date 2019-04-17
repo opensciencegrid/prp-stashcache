@@ -18,8 +18,10 @@ spec:
       initContainers:
       - name: chowndata
         image: busybox
-        command: ["sh", "-c", "chown -R 999:997 /data*"]
+        command: ["sh", "-c", "chown -R 999:997 /data* /xrdpfc/stash"]
         volumeMounts:
+        - name: cachedir
+          mountPath: /xrdpfc/stash
         - name: datavol1
           mountPath: /data1/stash
         - name: datavol2
@@ -72,6 +74,8 @@ spec:
           mountPath: /etc/grid-security/hostcert.pem
         - name: hostkey
           mountPath: /etc/grid-security/hostkey.pem
+        - name: cachedir
+          mountPath: /xrdpfc/stash
         - name: config
           mountPath: /etc/xrootd
         - name: datavol1
@@ -100,6 +104,10 @@ spec:
       - name: config
         configMap:
           name: stashcache
+      - name: cachedir
+        hostPath:
+          path: /nvme0
+          type: Directory
       - name: datavol1
         hostPath:
           path: /data1
