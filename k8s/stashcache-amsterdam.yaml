@@ -18,18 +18,27 @@ spec:
       initContainers:
       - name: chowndata
         image: busybox
-        command: ["sh", "-c", "chown -R 999:997 /data/stash"]
+        command: ["sh", "-c", "chown -R 10940:10940 /data/stash"]
         volumeMounts:
         - name: datavol
           mountPath: /data/stash
       containers:
       - name: stashcache
-        image: efajardo/prp-stashcache
+        resources:
+           limits:
+              memory: 40Gi
+           requests:
+              memory: 30Gi
+        image: opensciencegrid/stash-cache:development
         #command: ["sh", "-c", "sleep infinity"]
         env:
         - name: LOCAL_CACHE_DIR
           value: /data/stash
+        - name: XC_ROOTDIR
+          value: /data/stash
         - name: SITENAME
+          value: Amsterdam-Kubernetes-PRP
+        - name: XC_RESOURCENAME
           value: Amsterdam-Kubernetes-PRP
         imagePullPolicy: Always
         volumeMounts:
@@ -38,7 +47,14 @@ spec:
         - name: hostkey
           mountPath: /etc/grid-security/hostkey.pem
         - name: config
-          mountPath: /etc/xrootd
+          mountPath: /etc/xrootd/config.d/95-k8s-ports.cfg
+          subPath: 95-k8s-ports.cfg
+        - name: supervisorconf
+          mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
+          subPath: 90-fix-certs-initialization.conf
+        - name: fixcerts
+          mountPath: /usr/local/sbin/fix_certs.sh
+          subPath: fix_certs.sh
         - name: datavol
           mountPath: /data/stash
       volumes:
@@ -52,7 +68,14 @@ spec:
            type: File
       - name: config
         configMap:
-          name: stashcache
+          name: stashcache.d
+      - name: supervisorconf
+        configMap:
+          name: supervisor.d
+      - name: fixcerts
+        configMap:
+          name: fixcerts
+          defaultMode: 0744
       - name: datavol
         hostPath:
           path: /data
