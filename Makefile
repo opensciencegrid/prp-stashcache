@@ -15,3 +15,5 @@ pushconfig:
 	kubectl create configmap supervisor.d -n osg --from-file=90-fix-certs-initialization.conf=90-fix-certs-initialization.conf
 	-kubectl delete configmap fixcerts -n osg
 	kubectl create configmap fixcerts -n osg --from-file=fix_certs.sh=fix_certs.sh
+	-kubectl delete configmap mdisks.cfg -n osg
+	kubectl create configmap mdisks.cfg -n osg --from-file=92-disks.cfg=92-disks.cfg
