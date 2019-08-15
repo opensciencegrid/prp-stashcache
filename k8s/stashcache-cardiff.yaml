@@ -1,12 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
     k8s-app: stashcache
-  name: stashcache-amsterdam
+  name: stashcache-cardiff
 spec:
-  progressDeadlineSeconds: 2147483647
   replicas: 1
   selector:
     matchLabels:
@@ -18,7 +16,6 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      creationTimestamp: null
       labels:
         k8s-app: stashcache
     spec:
@@ -29,17 +26,12 @@ spec:
         - name: XC_ROOTDIR
           value: /data/stash
         - name: SITENAME
-          value: Amsterdam-Kubernetes-PRP
+          value: Cardiff-Kubernetes-PRP
         - name: XC_RESOURCENAME
-          value: Amsterdam-Kubernetes-PRP
+          value: Cardiff-Kubernetes-PRP
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache
-        resources:
-          limits:
-            memory: 40Gi
-          requests:
-            memory: 30Gi
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -72,7 +64,7 @@ spec:
         - mountPath: /data/stash
           name: datavol
       nodeSelector:
-        kubernetes.io/hostname: fiona-r-uva.vlan7.uvalight.net
+        kubernetes.io/hostname: stashcache.gravity.cf.ac.uk
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
@@ -99,7 +91,7 @@ spec:
           name: fixcerts
         name: fixcerts
       - hostPath:
-          path: /data
+          path: /tank
           type: Directory
         name: datavol
-status: {}
+
