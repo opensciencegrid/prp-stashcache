@@ -43,7 +43,7 @@ spec:
               memory: 24Gi
            requests:
               memory: 18Gi
-        image: opensciencegrid/prp-stashcache
+        image: opensciencegrid/stash-cache:stable
         #command: ["sh", "-c", "sleep infinity"]
         env:
         - name: LOCAL_CACHE_DIR
@@ -76,8 +76,6 @@ spec:
           mountPath: /etc/grid-security/hostkey.pem
         - name: cachedir
           mountPath: /xrdpfc/stash
-        - name: config
-          mountPath: /etc/xrootd
         - name: datavol1
           mountPath: /data1/stash
         - name: datavol2
@@ -91,7 +89,16 @@ spec:
         - name: datavol6
           mountPath: /data6/stash
         - name: datavol7
-          mountPath: /data7/stash
+          mountPath: /data7/stas
+        - mountPath: /etc/xrootd/config.d/40-osg-http.cfg
+          name: config
+          subPath: 40-osg-http.cfg
+        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
+          name: supervisorconf
+          subPath: 90-fix-certs-initialization.conf
+        - mountPath: /usr/local/sbin/fix_certs.sh
+          name: fixcerts
+          subPath: fix_certs.sh
       volumes:
       - name : hostcert
         hostPath:
@@ -101,9 +108,6 @@ spec:
         hostPath:
            path: /etc/grid-security/hostkey.pem
            type: File
-      - name: config
-        configMap:
-          name: stashcache
       - name: cachedir
         hostPath:
           path: /nvme0
@@ -136,3 +140,15 @@ spec:
         hostPath:
           path: /data7
           type: Directory
+      - configMap:
+          defaultMode: 420
+          name: stashcache.d
+        name: config
+      - configMap:
+          defaultMode: 420
+          name: supervisor.d
+        name: supervisorconf
+      - configMap:
+          defaultMode: 484
+          name: fixcerts
+        name: fixcerts
