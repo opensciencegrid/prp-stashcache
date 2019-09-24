@@ -38,8 +38,10 @@ spec:
         resources:
           limits:
             memory: 40Gi
+            cpu: 4
           requests:
             memory: 30Gi
+            cpu: 3
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
         volumeMounts:
@@ -47,9 +49,9 @@ spec:
           name: hostcert
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
-        - mountPath: /etc/xrootd/config.d/40-osg-http.cfg
+        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config
-          subPath: 40-osg-http.cfg
+          subPath: 10-k8s-https.cfg
         - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
           name: supervisorconf
           subPath: 90-fix-certs-initialization.conf
@@ -65,9 +67,6 @@ spec:
         image: busybox
         imagePullPolicy: Always
         name: chowndata
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /data/stash
           name: datavol
@@ -102,4 +101,4 @@ spec:
           path: /data
           type: Directory
         name: datavol
-status: {}
+

@@ -90,9 +90,9 @@ spec:
           mountPath: /data6/stash
         - name: datavol7
           mountPath: /data7/stas
-        - mountPath: /etc/xrootd/config.d/40-osg-http.cfg
+        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config
-          subPath: 40-osg-http.cfg
+          subPath: 10-k8s-https.cfg
         - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
           name: supervisorconf
           subPath: 90-fix-certs-initialization.conf

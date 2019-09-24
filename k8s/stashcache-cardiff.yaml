@@ -32,16 +32,14 @@ spec:
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
           name: hostcert
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
-        - mountPath: /etc/xrootd/config.d/40-osg-http.cfg
+        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config
-          subPath: 40-osg-http.cfg
+          subPath: 10-k8s-https.cfg
         - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
           name: supervisorconf
           subPath: 90-fix-certs-initialization.conf
@@ -57,9 +55,6 @@ spec:
         image: busybox
         imagePullPolicy: Always
         name: chowndata
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /data/stash
           name: datavol
@@ -94,4 +89,3 @@ spec:
           path: /tank
           type: Directory
         name: datavol
-
