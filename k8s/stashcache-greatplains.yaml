@@ -1,39 +1,27 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
+  creationTimestamp: null
   labels:
     k8s-app: stashcache
   name: stashcache-greatplains
-  namespace: osg
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: stashcache
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
         k8s-app: stashcache
     spec:
-      hostNetwork: true
-      nodeSelector:
-        kubernetes.io/hostname: osg.kans.nrp.internet2.edu
-      initContainers:
-      - name: chowndata
-        image: busybox
-        command: ["sh", "-c", "chown -R 999:997 /data/stash"]
-        volumeMounts:
-        - name: datavol
-          mountPath: /data/stash
       containers:
-      - name: stashcache
-        image: efajardo/prp-stashcache
-        resources:
-           limits:
-              memory: 44Gi
-              cpu: 6
-           requests:
-              memory: 42Gi
-              cpu: 4
-        #command: ["sh", "-c", "sleep infinity"]
-        env:
+      - env:
         - name: LOCAL_CACHE_DIR
           value: /data/stash
         - name: SITENAME
@@ -44,30 +32,55 @@ spec:
           value: osg.kans.nrp.internet2.edu:9004
         - name: XRDHTTPPORT
           value: "9001"
+        image: efajardo/prp-stashcache
         imagePullPolicy: Always
+        name: stashcache
+        resources:
+          limits:
+            cpu: 4
+            memory: 44Gi
+          requests:
+            cpu: 3
+            memory: 42Gi
         volumeMounts:
-        - name: hostcert
-          mountPath: /etc/grid-security/hostcert.pem
-        - name: hostkey
-          mountPath: /etc/grid-security/hostkey.pem
-        - name: config
-          mountPath: /etc/xrootd
-        - name: datavol
-          mountPath: /data/stash
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: hostcert
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+        - mountPath: /etc/xrootd
+          name: config
+        - mountPath: /data/stash
+          name: datavol
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      initContainers:
+      - command: ["sh", "-c", "chown -R 999:997 /data*"]
+        image: busybox
+        imagePullPolicy: Always
+        name: chowndata
+        volumeMounts:
+        - mountPath: /data/stash
+          name: datavol
+      nodeSelector:
+        kubernetes.io/hostname: osg.kans.nrp.internet2.edu
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
       volumes:
-      - name : hostcert
-        hostPath:
-           path: /etc/grid-security/hostcert.pem
-           type: File
-      - name : hostkey
-        hostPath:
-           path: /etc/grid-security/hostkey.pem
-           type: File
-      - name: config
-        configMap:
+      - hostPath:
+          path: /etc/grid-security/hostcert.pem
+          type: File
+        name: hostcert
+      - hostPath:
+          path: /etc/grid-security/hostkey.pem
+          type: File
+        name: hostkey
+      - configMap:
+          defaultMode: 420
           name: stashcache
-      - name: datavol
-        hostPath:
+        name: config
+      - hostPath:
           path: /tank
           type: Directory
+        name: datavol
 
