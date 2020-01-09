@@ -1,58 +1,38 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
+  creationTimestamp: null
   labels:
     k8s-app: stashcache
   name: stashcache-ucsd
-  namespace: osg
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: stashcache
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
         k8s-app: stashcache
     spec:
-      hostNetwork: true
-      nodeSelector:
-        kubernetes.io/hostname: stashcache.t2.ucsd.edu
-      initContainers:
-      - name: chowndata
-        image: busybox
-        command: ["sh", "-c", "chown -R 999:997 /data* /xrdpfc/stash"]
-        volumeMounts:
-        - name: cachedir
-          mountPath: /xrdpfc/stash
-        - name: datavol1
-          mountPath: /data1/stash
-        - name: datavol2
-          mountPath: /data2/stash
-        - name: datavol3
-          mountPath: /data3/stash
-        - name: datavol4
-          mountPath: /data4/stash 
-        - name: datavol5
-          mountPath: /data5/stash
-        - name: datavol6
-          mountPath: /data6/stash
-        - name: datavol7
-          mountPath: /data7/stash
       containers:
-      - name: stashcache
-        resources:
-           limits:
-              memory: 24Gi
-           requests:
-              memory: 18Gi
-        image: opensciencegrid/stash-cache:stable
-        #command: ["sh", "-c", "sleep infinity"]
-        env:
+      - env:
         - name: LOCAL_CACHE_DIR
+          value: /xrdpfc/stash
+        - name: XC_ROOTDIR
           value: /xrdpfc/stash
         - name: REDIRECTOR
           value: stashcache.t2.ucsd.edu:9004
         - name: XRDHTTPPORT
-          value: "9001"
+          value: "8000"
         - name: SITENAME
+          value: UCSD-Kubernetes-PRP
+        - name: XC_RESOURCENAME
           value: UCSD-Kubernetes-PRP
         - name: DATA1
           value: /data1/stash
@@ -68,82 +48,136 @@ spec:
           value: /data6/stash
         - name: DATA7
           value: /data7/stash
+        image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
+        name: stashcache
+        resources:
+          limits:
+            cpu: "8"
+            memory: 24Gi
+          requests:
+            cpu: "8"
+            memory: 18Gi
         volumeMounts:
-        - name: hostcert
-          mountPath: /etc/grid-security/hostcert.pem
-        - name: hostkey
-          mountPath: /etc/grid-security/hostkey.pem
-        - name: cachedir
-          mountPath: /xrdpfc/stash
-        - name: datavol1
-          mountPath: /data1/stash
-        - name: datavol2
-          mountPath: /data2/stash
-        - name: datavol3
-          mountPath: /data3/stash
-        - name: datavol4
-          mountPath: /data4/stash  
-        - name: datavol5
-          mountPath: /data5/stash
-        - name: datavol6
-          mountPath: /data6/stash
-        - name: datavol7
-          mountPath: /data7/stas
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: hostcert
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+        - mountPath: /xrdpfc/stash
+          name: cachedir
+        - mountPath: /data1/stash
+          name: datavol1
+        - mountPath: /data2/stash
+          name: datavol2
+        - mountPath: /data3/stash
+          name: datavol3
+        - mountPath: /data4/stash
+          name: datavol4
+        - mountPath: /data5/stash
+          name: datavol5
+        - mountPath: /data6/stash
+          name: datavol6
+        - mountPath: /data7/stash
+          name: datavol7
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config
+          name: config-stash
           subPath: 10-k8s-https.cfg
+        - mountPath: /etc/xrootd/config.d/40-osg-auth.cfg
+          name: config-stash
+          subPath: 40-osg-auth.cfg
+        - mountPath: /etc/xrootd/config.d/92-disks.cfg
+          name: xcachediskconfig
+          subPath: 92-disks.cfg
         - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
           name: supervisorconf
           subPath: 90-fix-certs-initialization.conf
         - mountPath: /usr/local/sbin/fix_certs.sh
           name: fixcerts
           subPath: fix_certs.sh
+      hostNetwork: true
+      initContainers:
+      - command:
+        - sh
+        - -c
+        - chown -R 10940:10940 /data* /xrdpfc/stash
+        image: busybox
+        imagePullPolicy: Always
+        name: chowndata
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /xrdpfc/stash
+          name: cachedir
+        - mountPath: /data1/stash
+          name: datavol1
+        - mountPath: /data2/stash
+          name: datavol2
+        - mountPath: /data3/stash
+          name: datavol3
+        - mountPath: /data4/stash
+          name: datavol4
+        - mountPath: /data5/stash
+          name: datavol5
+        - mountPath: /data6/stash
+          name: datavol6
+        - mountPath: /data7/stash
+          name: datavol7
+      nodeSelector:
+        kubernetes.io/hostname: stashcache.t2.ucsd.edu
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       volumes:
-      - name : hostcert
-        hostPath:
-           path: /etc/grid-security/hostcert.pem
-           type: File
-      - name : hostkey
-        hostPath:
-           path: /etc/grid-security/hostkey.pem
-           type: File
-      - name: cachedir
-        hostPath:
+      - hostPath:
+          path: /etc/grid-security/hostcert.pem
+          type: File
+        name: hostcert
+      - hostPath:
+          path: /etc/grid-security/hostkey.pem
+          type: File
+        name: hostkey
+      - hostPath:
           path: /nvme0
           type: Directory
-      - name: datavol1
-        hostPath:
+        name: cachedir
+      - hostPath:
           path: /data1
           type: Directory
-      - name: datavol2
-        hostPath:
+        name: datavol1
+      - hostPath:
           path: /data2
           type: Directory
-      - name: datavol3
-        hostPath:
+        name: datavol2
+      - hostPath:
           path: /data3
           type: Directory
-      - name: datavol4
-        hostPath:
+        name: datavol3
+      - hostPath:
           path: /data4
           type: Directory
-      - name: datavol5
-        hostPath:
+        name: datavol4
+      - hostPath:
           path: /data5
           type: Directory
-      - name: datavol6
-        hostPath:
+        name: datavol5
+      - hostPath:
           path: /data6
           type: Directory
-      - name: datavol7
-        hostPath:
+        name: datavol6
+      - hostPath:
           path: /data7
           type: Directory
+        name: datavol7
       - configMap:
           defaultMode: 420
           name: stashcache.d
-        name: config
+        name: config-stash
       - configMap:
           defaultMode: 420
           name: supervisor.d
@@ -152,3 +186,7 @@ spec:
           defaultMode: 484
           name: fixcerts
         name: fixcerts
+      - configMap:
+          defaultMode: 420
+          name: mdisks.cfg
+        name: xcachediskconfig

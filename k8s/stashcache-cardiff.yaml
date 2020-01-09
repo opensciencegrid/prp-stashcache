@@ -19,6 +19,10 @@ spec:
       labels:
         k8s-app: stashcache
     spec:
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       containers:
       - env:
         - name: LOCAL_CACHE_DIR
@@ -29,6 +33,8 @@ spec:
           value: Cardiff-Kubernetes-PRP
         - name: XC_RESOURCENAME
           value: Cardiff-Kubernetes-PRP
+        - name: XRDHTTPPORT
+          value: "8000"
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache
@@ -38,7 +44,7 @@ spec:
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config
+          name: config-http
           subPath: 10-k8s-https.cfg
         - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
           name: supervisorconf
@@ -76,7 +82,7 @@ spec:
       - configMap:
           defaultMode: 420
           name: stashcache.d
-        name: config
+        name: config-http
       - configMap:
           defaultMode: 420
           name: supervisor.d

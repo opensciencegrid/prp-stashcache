@@ -31,6 +31,8 @@ spec:
           value: osg.chic.nrp.internet2.edu:9004
         - name: XRDHTTPPORT
           value: "9001"
+        - name : XRDPORT
+          value: "9001"
         image: efajardo/prp-stashcache
         imagePullPolicy: Always
         name: stashcache
