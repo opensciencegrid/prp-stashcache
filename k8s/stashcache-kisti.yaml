@@ -21,6 +21,10 @@ spec:
       labels:
         k8s-app: stashcache
     spec:
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       containers:
       - env:
         - name: LOCAL_CACHE_DIR
@@ -37,7 +41,14 @@ spec:
           value: /data2/stash
         - name: DATA3
           value: /data3/stash
+        - name: CACHE_FQDN
+          value: "dtn2-daejeon.kreonet.net"
         image: opensciencegrid/stash-cache:stable
+        ports:
+         - containerPort: 8000
+           hostPort: 8000
+         - containerPort: 8444
+           hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
         resources:
@@ -47,13 +58,15 @@ spec:
           requests:
             memory: 10Gi
             cpu: 3
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
-          name: hostcert
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config
           subPath: 10-k8s-https.cfg
@@ -69,22 +82,40 @@ spec:
         - mountPath: /data3/stash
           name: dataroot3
       dnsPolicy: ClusterFirst
-      hostNetwork: true
+      initContainers:
+      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+        image: busybox
+        imagePullPolicy: Always
+        name: chowndata
+        volumeMounts:
+        - mountPath: /data/stash
+          name: dataroot
+        - mountPath: /data1/stash
+          name: dataroot
+        - mountPath: /data2/stash
+          name: dataroot2
+        - mountPath: /data3/stash
+          name: dataroot3
       nodeSelector:
         kubernetes.io/hostname: dtn2-daejeon.kreonet.net
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
-      - hostPath:
-          path: /etc/grid-security/hostcert.pem
-          type: File
-        name: hostcert
-      - hostPath:
-          path: /etc/grid-security/hostkey.pem
-          type: File
-        name: hostkey
+      - name: certificate
+        secret:
+          secretName: kisti-certs
+          items:
+          - key: hostcert
+            path: hostcert.pem
+          defaultMode: 0600
+      - name: hostkey
+        secret:
+          secretName: kisti-certs
+          items:
+          - key: hostkey
+            path: hostkey.pem
+          defaultMode: 0600
       - configMap:
           defaultMode: 420
           name: stashcache.d

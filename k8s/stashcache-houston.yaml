@@ -31,6 +31,8 @@ spec:
           value: Houston-I2-PRP
         - name: XRDHTTPPORT
           value: "8000"
+        - name: CACHE_FQDN
+          value: "osg-houston-stashcache.nrp.internet2.edu"
         image: opensciencegrid/stash-cache:stable
         ports:
          - containerPort: 8000
@@ -49,8 +51,12 @@ spec:
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
           name: certificate
+          readOnly: true
+          subPath: hostcert.pem
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config-http
           subPath: 10-k8s-https.cfg

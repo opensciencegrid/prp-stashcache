@@ -13,9 +13,12 @@ pushconfig:
 	kubectl create configmap fixcerts -n osg-services --from-file=fix_certs.sh=fix_certs.sh
 	-kubectl delete configmap fixcerts -n osg
 	kubectl create configmap fixcerts -n osg --from-file=fix_certs.sh=fix_certs.sh
-	-kubectl delete configmap mdisks.cfg -n osg
-	kubectl create configmap mdisks.cfg -n osg --from-file=92-disks.cfg=92-disks.cfg
+	-kubectl delete configmap mdisks.cfg -n osg-services
+	kubectl create configmap mdisks.cfg -n osg-services --from-file=92-disks.cfg=92-disks.cfg
 pushsecrets:
 	-kubectl delete secret houston-certs -n osg-services
 	kubectl create secret generic houston-certs -n osg-services --from-file=hostcert=houstonCerts/hostcert.pem --from-file=hostkey=houstonCerts/hostkey.pem
-
+	-kubectl delete secret kisti-certs -n osg-services
+	kubectl create secret generic kisti-certs -n osg-services --from-file=hostcert=kisti-cache-certs/hostcert.pem --from-file=hostkey=kisti-cache-certs/hostkey.pem
+	-kubectl delete secret amsterdam-certs -n osg-services
+	kubectl create secret generic amsterdam-certs -n osg-services --from-file=hostcert=amsterdam-certs/hostcert.pem --from-file=hostkey=amsterdam-certs/hostkey.pem

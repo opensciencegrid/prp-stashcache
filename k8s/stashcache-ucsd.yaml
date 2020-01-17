@@ -20,6 +20,10 @@ spec:
       labels:
         k8s-app: stashcache
     spec:
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       containers:
       - env:
         - name: LOCAL_CACHE_DIR
@@ -49,6 +53,11 @@ spec:
         - name: DATA7
           value: /data7/stash
         image: opensciencegrid/stash-cache:stable
+        ports:
+         - containerPort: 8000
+           hostPort: 8000
+         - containerPort: 8444
+           hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
         resources:
@@ -96,16 +105,10 @@ spec:
           subPath: fix_certs.sh
       hostNetwork: true
       initContainers:
-      - command:
-        - sh
-        - -c
-        - chown -R 10940:10940 /data* /xrdpfc/stash
+      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /xrdpfc/stash
           name: cachedir
@@ -142,38 +145,30 @@ spec:
           path: /etc/grid-security/hostkey.pem
           type: File
         name: hostkey
-      - hostPath:
-          path: /nvme0
-          type: Directory
-        name: cachedir
-      - hostPath:
-          path: /data1
-          type: Directory
-        name: datavol1
-      - hostPath:
-          path: /data2
-          type: Directory
-        name: datavol2
-      - hostPath:
-          path: /data3
-          type: Directory
-        name: datavol3
-      - hostPath:
-          path: /data4
-          type: Directory
-        name: datavol4
-      - hostPath:
-          path: /data5
-          type: Directory
-        name: datavol5
-      - hostPath:
-          path: /data6
-          type: Directory
-        name: datavol6
-      - hostPath:
-          path: /data7
-          type: Directory
-        name: datavol7
+      - name: cachedir
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-0
+      - name: datavol1
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-1
+      - name: datavol2
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-2
+      - name: datavol3
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-3
+      - name: datavol4
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-4
+      - name: datavol5
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-5
+      - name: datavol6
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-6
+      - name: datavol7
+        persistentVolumeClaim:
+          claimName: pvc-osg-stashcache.t2.ucsd.edu-7
       - configMap:
           defaultMode: 420
           name: stashcache.d

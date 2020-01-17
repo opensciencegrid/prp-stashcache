@@ -6,7 +6,6 @@ metadata:
     k8s-app: stashcache
   name: stashcache-amsterdam
 spec:
-  progressDeadlineSeconds: 2147483647
   replicas: 1
   selector:
     matchLabels:
@@ -22,6 +21,10 @@ spec:
       labels:
         k8s-app: stashcache
     spec:
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       containers:
       - env:
         - name: LOCAL_CACHE_DIR
@@ -32,7 +35,14 @@ spec:
           value: Amsterdam-Kubernetes-PRP
         - name: XC_RESOURCENAME
           value: Amsterdam-Kubernetes-PRP
+        - name: CACHE_FQDN
+          value: "fiona-r-uva.vlan7.uvalight.net"
         image: opensciencegrid/stash-cache:stable
+        ports:
+         - containerPort: 8000
+           hostPort: 8000
+         - containerPort: 8444
+           hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
         resources:
@@ -46,9 +56,13 @@ spec:
         terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
-          name: hostcert
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config
           subPath: 10-k8s-https.cfg
@@ -61,7 +75,6 @@ spec:
         - mountPath: /data/stash
           name: datavol
       dnsPolicy: ClusterFirst
-      hostNetwork: true
       initContainers:
       - command: ["sh", "-c", "chown -R 10940:10940 /data/stash"]
         image: busybox
@@ -77,14 +90,20 @@ spec:
       securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
-      - hostPath:
-          path: /etc/grid-security/hostcert.pem
-          type: File
-        name: hostcert
-      - hostPath:
-          path: /etc/grid-security/hostkey.pem
-          type: File
-        name: hostkey
+      - name: certificate
+        secret:
+          secretName: amsterdam-certs
+          items:
+          - key: hostcert
+            path: hostcert.pem
+          defaultMode: 0600
+      - name: hostkey
+        secret:
+          secretName: amsterdam-certs
+          items:
+          - key: hostkey
+            path: hostkey.pem
+          defaultMode: 0600
       - configMap:
           defaultMode: 420
           name: stashcache.d
@@ -97,8 +116,6 @@ spec:
           defaultMode: 484
           name: fixcerts
         name: fixcerts
-      - hostPath:
-          path: /data
-          type: Directory
-        name: datavol
-
+      - name: datavol
+        persistentVolumeClaim:
+          claimName: pvc-fiona-r-uva.vlan7.uvalight.net-0
