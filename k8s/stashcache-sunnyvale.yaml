@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: stashcache
+  name: stashcache-sunnyvale
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: stashcache
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: stashcache
+    spec:
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
+      containers:
+      - env:
+        - name: LOCAL_CACHE_DIR
+          value: /xcache-root
+        - name: XC_ROOTDIR
+          value: /xcache-root
+        - name: SITENAME
+          value: Sunnyvale-I2-PRP
+        - name: XC_RESOURCENAME
+          value: Sunnyvale-I2-PRP
+        - name: XRDHTTPPORT
+          value: "8000"
+        - name: CACHE_FQDN
+          value: "osg-houston-stashcache.nrp.internet2.edu"
+        image: opensciencegrid/stash-cache:stable
+        ports:
+         - containerPort: 8000
+           hostPort: 8000
+         - containerPort: 8444
+           hostPort: 8444
+        imagePullPolicy: Always
+        name: stashcache
+        resources:
+          limits:
+            memory: 20Gi
+            cpu: 4
+          requests:
+            memory: 10Gi
+            cpu: 3
+        volumeMounts:
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
+        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
+          name: config-http
+          subPath: 10-k8s-https.cfg
+        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
+          name: supervisorconf
+          subPath: 90-fix-certs-initialization.conf
+        - mountPath: /usr/local/sbin/fix_certs.sh
+          name: fixcerts
+          subPath: fix_certs.sh
+        - mountPath: /xcache-root
+          name: data1
+        - mountPath: /data1
+          name: data1
+        - mountPath: /data2
+          name: data2
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+        image: busybox
+        imagePullPolicy: Always
+        name: chowndata
+        volumeMounts:
+        - mountPath: /data1
+          name: data1
+        - mountPath: /data2
+          name: data2
+      nodeSelector:
+        kubernetes.io/hostname: osg-sunnyvale-stashcache.nrp.internet2.edu
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: certificate
+        secret:
+          secretName: sunnyvale-certs
+          items:
+          - key: hostcert
+            path: hostcert.pem
+          defaultMode: 0600 
+      - name: hostkey
+        secret:
+          secretName: sunnyvale-certs
+          items:
+          - key: hostkey
+            path: hostkey.pem
+          defaultMode: 0600
+      - configMap:
+          defaultMode: 420
+          name: stashcache.d
+        name: config-http
+      - configMap:
+          defaultMode: 420
+          name: supervisor.d
+        name: supervisorconf
+      - configMap:
+          defaultMode: 484
+          name: fixcerts
+        name: fixcerts
+      - name: data1
+        persistentVolumeClaim:
+          claimName: pvc-osg-sunnyvale-stashcache.nrp.internet2.edu-1
+      - name: data2
+        persistentVolumeClaim:
+          claimName: pvc-osg-sunnyvale-stashcache.nrp.internet2.edu-2
