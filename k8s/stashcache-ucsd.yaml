@@ -32,7 +32,7 @@ spec:
           value: /xrdpfc/stash
         - name: REDIRECTOR
           value: stashcache.t2.ucsd.edu:9004
-        - name: XRDHTTPPORT
+        - name: XRD_HTTP_PORT
           value: "8000"
         - name: SITENAME
           value: UCSD-Kubernetes-PRP
@@ -52,6 +52,8 @@ spec:
           value: /data6/stash
         - name: DATA7
           value: /data7/stash
+        - name: CACHE_FQDN
+          value: "stashcache.t2.ucsd.edu"
         image: opensciencegrid/stash-cache:stable
         ports:
          - containerPort: 8000
@@ -69,9 +71,13 @@ spec:
             memory: 18Gi
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
-          name: hostcert
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
         - mountPath: /xrdpfc/stash
           name: cachedir
         - mountPath: /data1/stash
@@ -103,7 +109,6 @@ spec:
         - mountPath: /usr/local/sbin/fix_certs.sh
           name: fixcerts
           subPath: fix_certs.sh
-      hostNetwork: true
       initContainers:
       - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
         image: busybox
@@ -130,21 +135,21 @@ spec:
         kubernetes.io/hostname: stashcache.t2.ucsd.edu
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
-      terminationGracePeriodSeconds: 30
-      tolerations:
-      - effect: NoSchedule
-        key: nautilus.io/stashcache
-        operator: Exists
       volumes:
-      - hostPath:
-          path: /etc/grid-security/hostcert.pem
-          type: File
-        name: hostcert
-      - hostPath:
-          path: /etc/grid-security/hostkey.pem
-          type: File
-        name: hostkey
+      - name: certificate
+        secret:
+          secretName: ucsd-certs
+          items:
+          - key: hostcert
+            path: hostcert.pem
+          defaultMode: 0600
+      - name: hostkey
+        secret:
+          secretName: ucsd-certs
+          items:
+          - key: hostkey
+            path: hostkey.pem
+          defaultMode: 0600
       - name: cachedir
         persistentVolumeClaim:
           claimName: pvc-osg-stashcache.t2.ucsd.edu-0

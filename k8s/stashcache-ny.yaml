@@ -1,69 +1,119 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
     k8s-app: stashcache
   name: stashcache-ny
-  namespace: osg
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: stashcache
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:
         k8s-app: stashcache
     spec:
-      hostNetwork: true
-      nodeSelector:
-        kubernetes.io/hostname: osg.newy32aoa.nrp.internet2.edu
-      initContainers:
-      - name: chowndata
-        image: busybox
-        command: ["sh", "-c", "chown -R 999:997 /data/stash"]
-        volumeMounts:
-        - name: datavol
-          mountPath: /data/stash
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       containers:
-      - name: stashcache
-        image: efajardo/prp-stashcache
-        resources:
-           limits:
-              memory: 16Gi
-           requests:
-              memory: 13Gi
-        #command: ["sh", "-c", "sleep infinity"]
-        env:
+      - env:
         - name: LOCAL_CACHE_DIR
+          value: /data/stash
+        - name: XC_ROOTDIR
           value: /data/stash
         - name: SITENAME
           value: NY-Kubernetes-PRP
         - name: REDIRECTOR
           value: osg.newy32aoa.nrp.internet2.edu:9004
         - name: XRDHTTPPORT
-          value: "9001"
+          value: "8000"
+        - name: CACHE_FQDN
+          value: "osg.newy32aoa.nrp.internet2.edu"
+        image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
+        name: stashcache
+        ports:
+         - containerPort: 8000
+           hostPort: 8000
+         - containerPort: 8444
+           hostPort: 8444
+        resources:
+          limits:
+            cpu: 4
+            memory: 20Gi
+          requests:
+            cpu: 3
+            memory: 18Gi
+        terminationMessagePolicy: File
         volumeMounts:
-        - name: hostcert
-          mountPath: /etc/grid-security/hostcert.pem
-        - name: hostkey
-          mountPath: /etc/grid-security/hostkey.pem
-        - name: config
-          mountPath: /etc/xrootd
-        - name: datavol
-          mountPath: /data/stash
+        - mountPath: /etc/grid-security/hostcert.pem
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
+        - mountPath: /etc/grid-security/hostkey.pem
+          name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
+        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
+          name: config-http
+          subPath: 10-k8s-https.cfg
+        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
+          name: supervisorconf
+          subPath: 90-fix-certs-initialization.conf
+        - mountPath: /usr/local/sbin/fix_certs.sh
+          name: fixcerts
+          subPath: fix_certs.sh
+        - mountPath: /data/stash
+          name: datavol
+      dnsPolicy: ClusterFirst
+      initContainers:
+      - command: ["sh", "-c", "chown -R 10940:10940 /data/stash"]
+        image: busybox
+        imagePullPolicy: Always
+        name: chowndata
+        volumeMounts:
+        - mountPath: /data/stash
+          name: datavol
+      nodeSelector:
+        kubernetes.io/hostname: osg.newy32aoa.nrp.internet2.edu
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
       volumes:
-      - name : hostcert
-        hostPath:
-           path: /etc/grid-security/hostcert.pem
-           type: File
-      - name : hostkey
-        hostPath:
-           path: /etc/grid-security/hostkey.pem
-           type: File
-      - name: config
-        configMap:
-          name: stashcache
+      - name: certificate
+        secret:
+          secretName: newyork-certs
+          items:
+          - key: hostcert
+            path: hostcert.pem
+          defaultMode: 0600
+      - name: hostkey
+        secret:
+          secretName: newyork-certs
+          items:
+          - key: hostkey
+            path: hostkey.pem
+          defaultMode: 0600
+      - configMap:
+          defaultMode: 420
+          name: stashcache.d
+        name: config-http
+      - configMap:
+          defaultMode: 420
+          name: supervisor.d
+        name: supervisorconf
+      - configMap:
+          defaultMode: 484
+          name: fixcerts
+        name: fixcerts
       - name: datavol
-        hostPath:
-          path: /tank
-          type: Directory
-
+        persistentVolumeClaim:
+          claimName: pvc-osg.newy32aoa.nrp.internet2.edu-1

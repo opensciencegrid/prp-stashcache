@@ -35,14 +35,32 @@ spec:
           value: Cardiff-Kubernetes-PRP
         - name: XRDHTTPPORT
           value: "8000"
+        - name: CACHE_FQDN
+          value: "stashcache.gravity.cf.ac.uk"
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
+        ports:
+         - containerPort: 8000
+           hostPort: 8000
+         - containerPort: 8444
+           hostPort: 8444
         name: stashcache
+        resources:
+          limits:
+            memory: 20Gi
+            cpu: 4
+          requests:
+            memory: 10Gi
+            cpu: 3
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
-          name: hostcert
+          name: certificate
+          readOnly: true
+          subPath: hostcert.pem
         - mountPath: /etc/grid-security/hostkey.pem
           name: hostkey
+          readOnly: true
+          subPath: hostkey.pem
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config-http
           subPath: 10-k8s-https.cfg
@@ -55,7 +73,6 @@ spec:
         - mountPath: /data/stash
           name: datavol
       dnsPolicy: ClusterFirst
-      hostNetwork: true
       initContainers:
       - command: ["sh", "-c", "chown -R 10940:10940 /data/stash"]
         image: busybox
@@ -68,17 +85,22 @@ spec:
         kubernetes.io/hostname: stashcache.gravity.cf.ac.uk
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
-      - hostPath:
-          path: /etc/grid-security/hostcert.pem
-          type: File
-        name: hostcert
-      - hostPath:
-          path: /etc/grid-security/hostkey.pem
-          type: File
-        name: hostkey
+      - name: certificate
+        secret:
+          secretName: cardiff-certs
+          items:
+          - key: hostcert
+            path: hostcert.pem
+          defaultMode: 0600
+      - name: hostkey
+        secret:
+          secretName: cardiff-certs
+          items:
+          - key: hostkey
+            path: hostkey.pem
+          defaultMode: 0600
       - configMap:
           defaultMode: 420
           name: stashcache.d
@@ -91,7 +113,6 @@ spec:
           defaultMode: 484
           name: fixcerts
         name: fixcerts
-      - hostPath:
-          path: /tank
-          type: Directory
-        name: datavol
+      - name: datavol
+        persistentVolumeClaim:
+          claimName: pvc-stashcache.gravity.cf.ac.uk-0
