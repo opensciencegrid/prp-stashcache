@@ -19,6 +19,10 @@ spec:
       labels:
         k8s-app: stashcache
     spec:
+      tolerations:
+      - effect: NoSchedule
+        key: nautilus.io/stashcache
+        operator: Exists
       containers:
       - env:
         - name: LOCAL_CACHE_DIR
@@ -60,12 +64,6 @@ spec:
         - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
           name: config-http
           subPath: 10-k8s-https.cfg
-        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
-          name: supervisorconf
-          subPath: 90-fix-certs-initialization.conf
-        - mountPath: /usr/local/sbin/fix_certs.sh
-          name: fixcerts
-          subPath: fix_certs.sh
         - mountPath: /xcache-root
           name: data1
         - mountPath: /data1
@@ -108,14 +106,6 @@ spec:
           defaultMode: 420
           name: stashcache.d
         name: config-http
-      - configMap:
-          defaultMode: 420
-          name: supervisor.d
-        name: supervisorconf
-      - configMap:
-          defaultMode: 484
-          name: fixcerts
-        name: fixcerts
       - name: data1
         persistentVolumeClaim:
           claimName: pvc-osg-houston-stashcache.nrp.internet2.edu-1

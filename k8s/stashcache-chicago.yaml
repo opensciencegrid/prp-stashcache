@@ -37,7 +37,7 @@ spec:
         - name: XRDHTTPPORT
           value: "8000"
         - name: CACHE_FQDN
-          value: "osg-chicago-stashcache.nrp.internet2.edu"
+          value: osg-chicago-stashcache.nrp.internet2.edu
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache

@@ -32,8 +32,6 @@ spec:
           value: /xrdpfc/stash
         - name: REDIRECTOR
           value: stashcache.t2.ucsd.edu:9004
-        - name: XRD_HTTP_PORT
-          value: "8000"
         - name: SITENAME
           value: UCSD-Kubernetes-PRP
         - name: XC_RESOURCENAME
@@ -53,12 +51,12 @@ spec:
         - name: DATA7
           value: /data7/stash
         - name: CACHE_FQDN
-          value: "stashcache.t2.ucsd.edu"
+          value: stashcache.t2.ucsd.edu
         image: opensciencegrid/stash-cache:stable
         ports:
          - containerPort: 8000
            hostPort: 8000
-         - containerPort: 8444
+         - containerPort: 8443
            hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
@@ -94,21 +92,9 @@ spec:
           name: datavol6
         - mountPath: /data7/stash
           name: datavol7
-        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config-stash
-          subPath: 10-k8s-https.cfg
-        - mountPath: /etc/xrootd/config.d/40-osg-auth.cfg
-          name: config-stash
-          subPath: 40-osg-auth.cfg
         - mountPath: /etc/xrootd/config.d/92-disks.cfg
           name: xcachediskconfig
           subPath: 92-disks.cfg
-        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
-          name: supervisorconf
-          subPath: 90-fix-certs-initialization.conf
-        - mountPath: /usr/local/sbin/fix_certs.sh
-          name: fixcerts
-          subPath: fix_certs.sh
       initContainers:
       - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
         image: busybox
@@ -174,18 +160,6 @@ spec:
       - name: datavol7
         persistentVolumeClaim:
           claimName: pvc-osg-stashcache.t2.ucsd.edu-7
-      - configMap:
-          defaultMode: 420
-          name: stashcache.d
-        name: config-stash
-      - configMap:
-          defaultMode: 420
-          name: supervisor.d
-        name: supervisorconf
-      - configMap:
-          defaultMode: 484
-          name: fixcerts
-        name: fixcerts
       - configMap:
           defaultMode: 420
           name: mdisks.cfg

@@ -37,6 +37,10 @@ spec:
           value: Amsterdam-Kubernetes-PRP
         - name: CACHE_FQDN
           value: "fiona-r-uva.vlan7.uvalight.net"
+        - name: XC_SPACE_LOW_WM
+          value: '0.96'
+        - name: XC_SPACE_HIGH_WM
+          value: '0.98'
         image: opensciencegrid/stash-cache:stable
         ports:
          - containerPort: 8000
