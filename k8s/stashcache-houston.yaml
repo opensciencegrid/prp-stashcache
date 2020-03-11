@@ -37,7 +37,7 @@ spec:
           value: "8000"
         - name: CACHE_FQDN
           value: "osg-houston-stashcache.nrp.internet2.edu"
-        image: opensciencegrid/stash-cache:stable
+        image: opensciencegrid/stash-cache:fresh
         ports:
          - containerPort: 8000
            hostPort: 8000

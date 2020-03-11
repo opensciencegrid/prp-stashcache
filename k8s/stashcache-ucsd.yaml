@@ -52,7 +52,7 @@ spec:
           value: /data7/stash
         - name: CACHE_FQDN
           value: stashcache.t2.ucsd.edu
-        image: opensciencegrid/stash-cache:stable
+        image: opensciencegrid/stash-cache:fresh
         ports:
          - containerPort: 8000
            hostPort: 8000

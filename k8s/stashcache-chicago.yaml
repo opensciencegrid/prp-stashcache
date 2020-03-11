@@ -48,11 +48,11 @@ spec:
            hostPort: 8444
         resources:
           limits:
-            cpu: 4
-            memory: 20Gi
+            cpu: 12
+            memory: 40Gi
           requests:
-            cpu: 3
-            memory: 18Gi
+            cpu: 6
+            memory: 38Gi
         terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
