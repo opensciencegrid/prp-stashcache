@@ -45,9 +45,11 @@ spec:
           value: "dtn2-daejeon.kreonet.net"
         image: opensciencegrid/stash-cache:stable
         ports:
+         - containerPort: 1094
+           hostPort: 1094
          - containerPort: 8000
            hostPort: 8000
-         - containerPort: 8444
+         - containerPort: 8443
            hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
@@ -67,9 +69,6 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config
-          subPath: 10-k8s-https.cfg
         - mountPath: /etc/xrootd/config.d/92-disks.cfg
           name: configdisk
           subPath: 92-disks.cfg
@@ -118,16 +117,8 @@ spec:
           defaultMode: 0600
       - configMap:
           defaultMode: 420
-          name: stashcache.d
-        name: config
-      - configMap:
-          defaultMode: 420
           name: mdisks.cfg
         name: configdisk
-      - configMap:
-          defaultMode: 420
-          name: supervisor.d
-        name: supervisorconf
       - name: dataroot
         persistentVolumeClaim:
           claimName: pvc-dtn2-daejeon-kreonet-net-1

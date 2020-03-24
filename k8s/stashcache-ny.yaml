@@ -37,10 +37,16 @@ spec:
           value: "8000"
         - name: CACHE_FQDN
           value: "osg.newy32aoa.nrp.internet2.edu"
+        - name: XC_SPACE_LOW_WM
+          value: '0.96'
+        - name: XC_SPACE_HIGH_WM
+          value: '0.98'
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache
         ports:
+         - containerPort: 1094
+           hostPort: 1094
          - containerPort: 8000
            hostPort: 8000
          - containerPort: 8443

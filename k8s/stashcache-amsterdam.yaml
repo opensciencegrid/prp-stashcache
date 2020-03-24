@@ -43,9 +43,11 @@ spec:
           value: '0.98'
         image: opensciencegrid/stash-cache:stable
         ports:
+         - containerPort: 1094
+           hostPort: 1094
          - containerPort: 8000
            hostPort: 8000
-         - containerPort: 8444
+         - containerPort: 8443
            hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
@@ -56,8 +58,6 @@ spec:
           requests:
             memory: 30Gi
             cpu: 3
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
         volumeMounts:
         - mountPath: /etc/grid-security/hostcert.pem
           name: certificate
@@ -67,15 +67,6 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config
-          subPath: 10-k8s-https.cfg
-        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
-          name: supervisorconf
-          subPath: 90-fix-certs-initialization.conf
-        - mountPath: /usr/local/sbin/fix_certs.sh
-          name: fixcerts
-          subPath: fix_certs.sh
         - mountPath: /data/stash
           name: datavol
       dnsPolicy: ClusterFirst
@@ -91,7 +82,6 @@ spec:
         kubernetes.io/hostname: fiona-r-uva.vlan7.uvalight.net
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: certificate
@@ -108,18 +98,6 @@ spec:
           - key: hostkey
             path: hostkey.pem
           defaultMode: 0600
-      - configMap:
-          defaultMode: 420
-          name: stashcache.d
-        name: config
-      - configMap:
-          defaultMode: 420
-          name: supervisor.d
-        name: supervisorconf
-      - configMap:
-          defaultMode: 484
-          name: fixcerts
-        name: fixcerts
       - name: datavol
         persistentVolumeClaim:
           claimName: pvc-fiona-r-uva.vlan7.uvalight.net-0

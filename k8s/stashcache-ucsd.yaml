@@ -54,6 +54,8 @@ spec:
           value: stashcache.t2.ucsd.edu
         image: opensciencegrid/stash-cache:fresh
         ports:
+         - containerPort: 1094
+           hostPort: 1094
          - containerPort: 8000
            hostPort: 8000
          - containerPort: 8443

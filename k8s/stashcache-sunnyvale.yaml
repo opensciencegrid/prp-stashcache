@@ -39,6 +39,8 @@ spec:
           value: "osg-houston-stashcache.nrp.internet2.edu"
         image: opensciencegrid/stash-cache:stable
         ports:
+         - containerPort: 1094
+           hostPort: 1094
          - containerPort: 8000
            hostPort: 8000
          - containerPort: 8444
