@@ -38,10 +38,10 @@ spec:
         - name: CACHE_FQDN
           value: "osg.newy32aoa.nrp.internet2.edu"
         - name: XC_SPACE_LOW_WM
-          value: '0.96'
+          value: '0.7'
         - name: XC_SPACE_HIGH_WM
-          value: '0.98'
-        image: opensciencegrid/stash-cache:stable
+          value: '0.8'
+        image: opensciencegrid/stash-cache:fresh
         imagePullPolicy: Always
         name: stashcache
         ports:
