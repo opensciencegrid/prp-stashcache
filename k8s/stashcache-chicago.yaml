@@ -39,9 +39,9 @@ spec:
         - name: CACHE_FQDN
           value: osg-chicago-stashcache.nrp.internet2.edu
         - name: XC_SPACE_LOW_WM
-          value: '0.96'
+          value: '0.92'
         - name: XC_SPACE_HIGH_WM
-          value: '0.98'
+          value: '0.96'
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache

@@ -26,9 +26,9 @@ spec:
       containers:
       - env:
         - name: LOCAL_CACHE_DIR
-          value: /data/stash
+          value: /data/stash/stashcache
         - name: XC_ROOTDIR
-          value: /data/stash
+          value: /data/stash/stashcache
         - name: SITENAME
           value: NY-Kubernetes-PRP
         - name: REDIRECTOR
@@ -38,9 +38,9 @@ spec:
         - name: CACHE_FQDN
           value: "osg.newy32aoa.nrp.internet2.edu"
         - name: XC_SPACE_LOW_WM
-          value: '0.7'
+          value: '0.88'
         - name: XC_SPACE_HIGH_WM
-          value: '0.8'
+          value: '0.9'
         image: opensciencegrid/stash-cache:fresh
         imagePullPolicy: Always
         name: stashcache
@@ -72,7 +72,7 @@ spec:
           name: datavol
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data/stash"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /data/stash/stashcache"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
