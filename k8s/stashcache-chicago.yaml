@@ -42,7 +42,8 @@ spec:
           value: '0.92'
         - name: XC_SPACE_HIGH_WM
           value: '0.96'
-        image: opensciencegrid/stash-cache:stable
+        image: opensciencegrid/stash-cache:fresh
+        #image: efajardo/stash-cache:fresh
         imagePullPolicy: Always
         name: stashcache
         ports:

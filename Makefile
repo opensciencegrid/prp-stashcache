@@ -1,12 +1,8 @@
 pushconfig:
-	-kubectl delete configmap stashcache.d -n osg-services
-	kubectl create configmap stashcache.d  -n osg-services --from-file=10-k8s-https.cfg --from-file=40-osg-auth.cfg
-	-kubectl delete configmap supervisor.d -n osg-services
-	kubectl create configmap supervisor.d -n osg-services --from-file=90-fix-certs-initialization.conf=90-fix-certs-initialization.conf
-	-kubectl delete configmap fixcerts -n osg-services
-	kubectl create configmap fixcerts -n osg-services --from-file=fix_certs.sh=fix_certs.sh
 	-kubectl delete configmap mdisks.cfg -n osg-services
 	kubectl create configmap mdisks.cfg -n osg-services --from-file=92-disks.cfg=92-disks.cfg
+	-kubectl delete configmap sunnyvaledisks -n osg-services
+	kubectl create configmap sunnyvaledisks -n osg-services --from-file=90-cache-disks.cfg=90-sunnyvale-cache-disks.cfg
 pushsecrets:
 	-kubectl delete secret houston-certs -n osg-services
 	kubectl create secret generic houston-certs -n osg-services --from-file=hostcert=houstonCerts/hostcert.pem --from-file=hostkey=houstonCerts/hostkey.pem

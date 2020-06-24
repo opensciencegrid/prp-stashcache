@@ -41,6 +41,9 @@ spec:
           value: '0.88'
         - name: XC_SPACE_HIGH_WM
           value: '0.9'
+        - name: XRDDEBUG
+          value: "True"
+        #image: efajardo/stash-cache:upcoming
         image: opensciencegrid/stash-cache:fresh
         imagePullPolicy: Always
         name: stashcache

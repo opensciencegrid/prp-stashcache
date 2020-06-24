@@ -37,13 +37,16 @@ spec:
           value: "8000"
         - name: CACHE_FQDN
           value: "osg-houston-stashcache.nrp.internet2.edu"
-        image: opensciencegrid/stash-cache:stable
+        - name: XRDDEBUG
+          value: "True"
+        #image: opensciencegrid/stash-cache:stable
+        image: efajardo/stash-cache:upcoming
         ports:
          - containerPort: 1094
            hostPort: 1094
          - containerPort: 8000
            hostPort: 8000
-         - containerPort: 8444
+         - containerPort: 8443
            hostPort: 8444
         imagePullPolicy: Always
         name: stashcache
@@ -63,21 +66,17 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config-http
-          subPath: 10-k8s-https.cfg
-        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
-          name: supervisorconf
-          subPath: 90-fix-certs-initialization.conf
-        - mountPath: /usr/local/sbin/fix_certs.sh
-          name: fixcerts
-          subPath: fix_certs.sh
+        - mountPath: /etc/xrootd/config.d/90-cache-disks.cfg
+          name: xcache-disk-config
+          subPath: 90-cache-disks.cfg
         - mountPath: /xcache-root
           name: data1
         - mountPath: /data1
           name: data1
         - mountPath: /data2
           name: data2
+        - mountPath: /xcache-meta
+          name: data1
       dnsPolicy: ClusterFirst
       initContainers:
       - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
@@ -89,11 +88,17 @@ spec:
           name: data1
         - mountPath: /data2
           name: data2
+        resources:
+          limits:
+            cpu: 3
+            memory: 25Gi
+          requests:
+            cpu: 2
+            memory: 20Gi
       nodeSelector:
         kubernetes.io/hostname: osg-sunnyvale-stashcache.nrp.internet2.edu
       restartPolicy: Always
       schedulerName: default-scheduler
-      securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
       - name: certificate
@@ -110,21 +115,20 @@ spec:
           - key: hostkey
             path: hostkey.pem
           defaultMode: 0600
-      - configMap:
-          defaultMode: 420
-          name: stashcache.d
-        name: config-http
-      - configMap:
-          defaultMode: 420
-          name: supervisor.d
-        name: supervisorconf
-      - configMap:
-          defaultMode: 484
-          name: fixcerts
-        name: fixcerts
       - name: data1
         persistentVolumeClaim:
           claimName: pvc-osg-sunnyvale-stashcache.nrp.internet2.edu-1
       - name: data2
         persistentVolumeClaim:
           claimName: pvc-osg-sunnyvale-stashcache.nrp.internet2.edu-2
+      - name : xcache-disk-config
+        configMap:
+           defaultMode: 420
+           items:
+           - key: 90-cache-disks.cfg
+             path: 90-cache-disks.cfg
+           name: sunnyvaledisks
+
+
+
+
