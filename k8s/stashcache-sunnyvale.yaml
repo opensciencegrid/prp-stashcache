@@ -25,12 +25,8 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /xcache-root
         - name: XC_ROOTDIR
-          value: /xcache-root
-        - name: SITENAME
-          value: Sunnyvale-I2-PRP
+          value: /xcache
         - name: XC_RESOURCENAME
           value: Sunnyvale-I2-PRP
         - name: XRDHTTPPORT
@@ -39,8 +35,7 @@ spec:
           value: "osg-houston-stashcache.nrp.internet2.edu"
         - name: XRDDEBUG
           value: "True"
-        #image: opensciencegrid/stash-cache:stable
-        image: efajardo/stash-cache:upcoming
+        image: opensciencegrid/stash-cache:upcoming-fresh
         ports:
          - containerPort: 1094
            hostPort: 1094
@@ -66,27 +61,24 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /etc/xrootd/config.d/90-cache-disks.cfg
-          name: xcache-disk-config
-          subPath: 90-cache-disks.cfg
-        - mountPath: /xcache-root
+        - mountPath: /xcache
           name: data1
-        - mountPath: /data1
+        - mountPath: /xcache/data1
           name: data1
-        - mountPath: /data2
+        - mountPath: /xcache/data2
           name: data2
-        - mountPath: /xcache-meta
-          name: data1
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
         volumeMounts:
-        - mountPath: /data1
+        - mountPath: /xcache
           name: data1
-        - mountPath: /data2
+        - mountPath: /xcache/data1
+          name: data1
+        - mountPath: /xcache/data2
           name: data2
         resources:
           limits:
@@ -121,14 +113,5 @@ spec:
       - name: data2
         persistentVolumeClaim:
           claimName: pvc-osg-sunnyvale-stashcache.nrp.internet2.edu-2
-      - name : xcache-disk-config
-        configMap:
-           defaultMode: 420
-           items:
-           - key: 90-cache-disks.cfg
-             path: 90-cache-disks.cfg
-           name: sunnyvaledisks
-
-
 
 

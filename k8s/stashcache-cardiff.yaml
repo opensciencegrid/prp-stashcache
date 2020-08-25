@@ -25,10 +25,8 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /data/stash
         - name: XC_ROOTDIR
-          value: /data/stash
+          value: /xcache
         - name: SITENAME
           value: Cardiff-Kubernetes-PRP
         - name: XC_RESOURCENAME
@@ -63,16 +61,16 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /data/stash
+        - mountPath: /xcache
           name: datavol
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data/stash"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
         volumeMounts:
-        - mountPath: /data/stash
+        - mountPath: /xcache
           name: datavol
       nodeSelector:
         kubernetes.io/hostname: stashcache.gravity.cf.ac.uk

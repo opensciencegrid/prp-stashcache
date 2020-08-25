@@ -26,10 +26,8 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /xrdpfc/stash
         - name: XC_ROOTDIR
-          value: /xrdpfc/stash
+          value: /xcache
         - name: REDIRECTOR
           value: stashcache.t2.ucsd.edu:9004
         - name: SITENAME
@@ -52,7 +50,8 @@ spec:
           value: /data7/stash
         - name: CACHE_FQDN
           value: stashcache.t2.ucsd.edu
-        image: opensciencegrid/stash-cache:fresh
+        #image: opensciencegrid/stash-cache:fresh
+        image:  efajardo/stash-cache:el8
         ports:
          - containerPort: 1094
            hostPort: 1094
@@ -78,7 +77,7 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /xrdpfc/stash
+        - mountPath: /xcache
           name: cachedir
         - mountPath: /data1/stash
           name: datavol1
@@ -98,12 +97,12 @@ spec:
           name: xcachediskconfig
           subPath: 92-disks.cfg
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache*"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
         volumeMounts:
-        - mountPath: /xrdpfc/stash
+        - mountPath: /xcache
           name: cachedir
         - mountPath: /data1/stash
           name: datavol1
@@ -119,6 +118,13 @@ spec:
           name: datavol6
         - mountPath: /data7/stash
           name: datavol7
+        resources:
+          limits:
+            cpu: 3
+            memory: 25Gi
+          requests:
+            cpu: 2
+            memory: 20Gi
       nodeSelector:
         kubernetes.io/hostname: stashcache.t2.ucsd.edu
       restartPolicy: Always

@@ -25,8 +25,6 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /data/stash/stashcache
         - name: XC_ROOTDIR
           value: /data/stash/stashcache
         - name: SITENAME
@@ -44,7 +42,7 @@ spec:
         - name: XRDDEBUG
           value: "True"
         #image: efajardo/stash-cache:upcoming
-        image: opensciencegrid/stash-cache:fresh
+        image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache
         ports:

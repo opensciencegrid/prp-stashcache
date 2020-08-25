@@ -27,23 +27,15 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /data/stash
         - name: XC_ROOTDIR
-          value: /data/stash
+          value: /xcache
         - name: SITENAME
           value: Kisti-Kubernetes-PRP
         - name: XC_RESOURCENAME
           value: Kisti-Kubernetes-PRP
-        - name: DATA1
-          value: /data1/stash
-        - name: DATA2
-          value: /data2/stash
-        - name: DATA3
-          value: /data3/stash
         - name: CACHE_FQDN
           value: "dtn2-daejeon.kreonet.net"
-        image: opensciencegrid/stash-cache:stable
+        image: opensciencegrid/stash-cache:fresh
         ports:
          - containerPort: 1094
            hostPort: 1094
@@ -69,10 +61,7 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /etc/xrootd/config.d/92-disks.cfg
-          name: configdisk
-          subPath: 92-disks.cfg
-        - mountPath: /data/stash
+        - mountPath: /xcache
           name: dataroot
         - mountPath: /data1/stash
           name: dataroot
@@ -82,18 +71,18 @@ spec:
           name: dataroot3
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache*"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
         volumeMounts:
-        - mountPath: /data/stash
+        - mountPath: /xcache
           name: dataroot
-        - mountPath: /data1/stash
+        - mountPath: /xcache/data1
           name: dataroot
-        - mountPath: /data2/stash
+        - mountPath: /xcache/data2
           name: dataroot2
-        - mountPath: /data3/stash
+        - mountPath: /xcache/data3
           name: dataroot3
       nodeSelector:
         kubernetes.io/hostname: dtn2-daejeon.kreonet.net
@@ -115,10 +104,6 @@ spec:
           - key: hostkey
             path: hostkey.pem
           defaultMode: 0600
-      - configMap:
-          defaultMode: 420
-          name: mdisks.cfg
-        name: configdisk
       - name: dataroot
         persistentVolumeClaim:
           claimName: pvc-dtn2-daejeon-kreonet-net-1

@@ -26,10 +26,8 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /data/stash
         - name: XC_ROOTDIR
-          value: /data/stash
+          value: /xcache
         - name: SITENAME
           value: Chicago-Kubernetes-PRP
         - name: REDIRECTOR
@@ -70,26 +68,24 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /etc/xrootd/config.d/10-k8s-https.cfg
-          name: config-http
-          subPath: 10-k8s-https.cfg
-        - mountPath: /etc/supervisord.d/90-fix-certs-initialization.conf
-          name: supervisorconf
-          subPath: 90-fix-certs-initialization.conf
-        - mountPath: /usr/local/sbin/fix_certs.sh
-          name: fixcerts
-          subPath: fix_certs.sh
-        - mountPath: /data/stash
+        - mountPath: /xcache
           name: datavol
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache/*"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
         volumeMounts:
-        - mountPath: /data/stash
+        - mountPath: /xcache
           name: datavol
+        resources:
+          limits:
+            cpu: 2
+            memory: 15Gi
+          requests:
+            cpu: 2
+            memory: 10Gi
       nodeSelector:
         kubernetes.io/hostname: osg.chic.nrp.internet2.edu
       restartPolicy: Always
