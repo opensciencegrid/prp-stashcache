@@ -30,6 +30,8 @@ spec:
           value: /xcache
         - name: SITENAME
           value: GreatPLains-Kubernetes-PRP
+        - name: XC_RESOURCENAME
+          value: GreatPLains-Kubernetes-PRP
         - name: RAMSIZE
           value: 30g
         - name: REDIRECTOR
@@ -71,21 +73,21 @@ spec:
         - mountPath: /xcache
           name: datavol
       dnsPolicy: ClusterFirst
-      initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data/stash/*"]
-        image: busybox
-        imagePullPolicy: Always
-        name: chowndata
-        volumeMounts:
-        - mountPath: /data/stash
-          name: datavol
-        resources:
-          limits:
-            cpu: 3
-            memory: 25Gi
-          requests:
-            cpu: 2
-            memory: 20Gi
+      #initContainers:
+      #- command: ["sh", "-c", "chown -R 10940:10940 /data/stash/*"]
+      #  image: busybox
+      #  imagePullPolicy: Always
+      #  name: chowndata
+      #  volumeMounts:
+      #  - mountPath: /data/stash
+      #    name: datavol
+      #  resources:
+      #    limits:
+      #      cpu: 3
+      #      memory: 25Gi
+      #    requests:
+      #      cpu: 2
+      #      memory: 20Gi
       nodeSelector:
         kubernetes.io/hostname: osg.kans.nrp.internet2.edu
       restartPolicy: Always

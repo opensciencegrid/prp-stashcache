@@ -28,14 +28,14 @@ spec:
       containers:
       - env:
         - name: XC_ROOTDIR
-          value: /xcache
+          value: /xcache/namespace
         - name: SITENAME
           value: Kisti-Kubernetes-PRP
         - name: XC_RESOURCENAME
           value: Kisti-Kubernetes-PRP
         - name: CACHE_FQDN
           value: "dtn2-daejeon.kreonet.net"
-        image: opensciencegrid/stash-cache:fresh
+        image: opensciencegrid/stash-cache:upcoming-fresh
         ports:
          - containerPort: 1094
            hostPort: 1094
@@ -61,13 +61,13 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /xcache
+        - mountPath: /xcache/namespace
           name: dataroot
-        - mountPath: /data1/stash
+        - mountPath: /xcache/data1
           name: dataroot
-        - mountPath: /data2/stash
+        - mountPath: /xcache/data2
           name: dataroot2
-        - mountPath: /data3/stash
+        - mountPath: /xcache/data3
           name: dataroot3
       dnsPolicy: ClusterFirst
       initContainers:

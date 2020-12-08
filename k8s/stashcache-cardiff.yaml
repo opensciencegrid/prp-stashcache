@@ -26,7 +26,7 @@ spec:
       containers:
       - env:
         - name: XC_ROOTDIR
-          value: /xcache
+          value: /xcache/namespace
         - name: SITENAME
           value: Cardiff-Kubernetes-PRP
         - name: XC_RESOURCENAME
@@ -61,7 +61,7 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /xcache
+        - mountPath: /xcache/namespace
           name: datavol
       dnsPolicy: ClusterFirst
       initContainers:

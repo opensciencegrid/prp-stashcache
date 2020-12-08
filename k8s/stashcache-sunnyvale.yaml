@@ -35,7 +35,7 @@ spec:
           value: "osg-houston-stashcache.nrp.internet2.edu"
         - name: XRDDEBUG
           value: "True"
-        image: opensciencegrid/stash-cache:upcoming-fresh
+        image: opensciencegrid/stash-cache:stable
         ports:
          - containerPort: 1094
            hostPort: 1094

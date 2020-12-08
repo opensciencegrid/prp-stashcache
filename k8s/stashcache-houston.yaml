@@ -25,10 +25,8 @@ spec:
         operator: Exists
       containers:
       - env:
-        - name: LOCAL_CACHE_DIR
-          value: /xcache-root
         - name: XC_ROOTDIR
-          value: /xcache-root
+          value: /xcache
         - name: SITENAME
           value: Houston-I2-PRP
         - name: XC_RESOURCENAME
@@ -39,7 +37,7 @@ spec:
           value: '0.96'
         - name: XC_SPACE_HIGH_WM
           value: '0.98'
-        image: opensciencegrid/stash-cache:fresh
+        image: opensciencegrid/stash-cache:stable
         ports:
          - containerPort: 1094
            hostPort: 1094
@@ -65,17 +63,21 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /xcache-root
+        - mountPath: /xcache
           name: data1
+        - mountPath: /xcache/data2
+          name: data2
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /data*"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache*"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
         volumeMounts:
-        - mountPath: /data1
+        - mountPath: /xcache
           name: data1
+        - mountPath: /xcache/data2
+          name: data2
       nodeSelector:
         kubernetes.io/hostname: osg-houston-stashcache.nrp.internet2.edu
       restartPolicy: Always
@@ -99,6 +101,9 @@ spec:
           defaultMode: 0600
       - name: data1
         persistentVolumeClaim:
-          claimName: pvc-osg-houston-stashcache.nrp.internet2.edu
+          claimName: pvc-osg-houston-stashcache.nrp.internet2.edu-1
+      - name: data2
+        persistentVolumeClaim:
+          claimName: pvc-osg-houston-stashcache.nrp.internet2.edu-2
 
 
