@@ -27,7 +27,7 @@ spec:
       containers:
       - env:
         - name: XC_ROOTDIR
-          value: /xcache/namespace
+          value: /xcache
         - name: SITENAME
           value: Chicago-Kubernetes-PRP
         - name: REDIRECTOR
@@ -40,6 +40,8 @@ spec:
           value: '0.96'
         - name: XC_SPACE_HIGH_WM
           value: '0.98'
+        - name: XC_NUM_LOGROTATE
+          value: 1g
         image: opensciencegrid/stash-cache:stable
         imagePullPolicy: Always
         name: stashcache
@@ -67,11 +69,11 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /xcache/namespace
+        - mountPath: /xcache
           name: datavol
       dnsPolicy: ClusterFirst
       initContainers:
-      - command: ["sh", "-c", "chown -R 10940:10940 /xcache/*"]
+      - command: ["sh", "-c", "chown -R 10940:10940 /xcache"]
         image: busybox
         imagePullPolicy: Always
         name: chowndata
