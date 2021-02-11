@@ -28,7 +28,7 @@ spec:
       containers:
       - env:
         - name: XC_ROOTDIR
-          value: /xcache/namespace
+          value: /xcache
         - name: SITENAME
           value: Amsterdam-Kubernetes-PRP
         - name: XC_RESOURCENAME
@@ -39,7 +39,7 @@ spec:
           value: '0.97'
         - name: XC_SPACE_HIGH_WM
           value: '0.99'
-        image: opensciencegrid/stash-cache:upcoming-fresh
+        image: opensciencegrid/stash-cache:fresh
         ports:
          - containerPort: 1094
            hostPort: 1094
@@ -65,7 +65,7 @@ spec:
           name: hostkey
           readOnly: true
           subPath: hostkey.pem
-        - mountPath: /xcache/namespace
+        - mountPath: /xcache
           name: datavol
       dnsPolicy: ClusterFirst
       initContainers:
